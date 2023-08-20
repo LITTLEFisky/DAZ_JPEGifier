@@ -1,0 +1,11 @@
+C:\Users\fisky\source\repos\DAZ3D_JPEGifier\DAZ3D_JPEGifier\bin\Debug\DAZ3D_JPEGifier.exe.config
+C:\Users\fisky\source\repos\DAZ3D_JPEGifier\DAZ3D_JPEGifier\bin\Debug\DAZ3D_JPEGifier.exe
+C:\Users\fisky\source\repos\DAZ3D_JPEGifier\DAZ3D_JPEGifier\bin\Debug\DAZ3D_JPEGifier.pdb
+C:\Users\fisky\source\repos\DAZ3D_JPEGifier\DAZ3D_JPEGifier\obj\Debug\DAZ3D_JPEGifier.csproj.AssemblyReference.cache
+C:\Users\fisky\source\repos\DAZ3D_JPEGifier\DAZ3D_JPEGifier\obj\Debug\DAZ3D_JPEGifier.Form1.resources
+C:\Users\fisky\source\repos\DAZ3D_JPEGifier\DAZ3D_JPEGifier\obj\Debug\DAZ3D_JPEGifier.Properties.Resources.resources
+C:\Users\fisky\source\repos\DAZ3D_JPEGifier\DAZ3D_JPEGifier\obj\Debug\DAZ3D_JPEGifier.csproj.GenerateResource.cache
+C:\Users\fisky\source\repos\DAZ3D_JPEGifier\DAZ3D_JPEGifier\obj\Debug\DAZ3D_JPEGifier.csproj.CoreCompileInputs.cache
+C:\Users\fisky\source\repos\DAZ3D_JPEGifier\DAZ3D_JPEGifier\obj\Debug\DAZ3D_JPEGifier.exe
+C:\Users\fisky\source\repos\DAZ3D_JPEGifier\DAZ3D_JPEGifier\obj\Debug\DAZ3D_JPEGifier.pdb
+C:\Users\fisky\source\repos\DAZ3D_JPEGifier\DAZ3D_JPEGifier\obj\Debug\DAZ3D_JPEGifier.Form2.resources
