@@ -24,7 +24,16 @@ namespace DAZ3D_JPEGifier
 
         private void button1_Click(object sender, EventArgs e)
         {
+            Program.textureSize = Convert.ToInt32(comboBox1.Text.ToString());
+            Program.resize = checkBox1.Checked;
             Program.quality = trackBar1.Value;
+            Program.ready = true;
+            Close();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Program.ready = false;
             Close();
         }
     }

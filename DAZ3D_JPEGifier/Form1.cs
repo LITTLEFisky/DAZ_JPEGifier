@@ -31,6 +31,26 @@ namespace DAZ3D_JPEGifier
             }
             return null;
         }
+
+        public static void ResizeJpg(string path, int nWidth, int nHeight)
+        {
+            using (var result = new Bitmap(nWidth, nHeight))
+            {
+                using (var input = new Bitmap(path))
+                {
+                    using (Graphics g = Graphics.FromImage((System.Drawing.Image)result))
+                    {
+                        g.DrawImage(input, 0, 0, nWidth, nHeight);
+                    }
+                }
+
+                var ici = ImageCodecInfo.GetImageEncoders().FirstOrDefault(ie => ie.MimeType == "image/jpeg");
+                var eps = new EncoderParameters(1);
+                eps.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, 100L);
+                result.Save(path, ici, eps);
+            }
+        }
+
         private void DetectStudio4(string path)
         {
             var autodetect = File.OpenRead(path);
@@ -222,7 +242,7 @@ namespace DAZ3D_JPEGifier
                 "and press \"JPEGify\"!\n\n" +
                 "Code (C)LITTLEFisky, 2023", "About", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
-
+        
         private void button2_Click(object sender, EventArgs e)
         {
             if(dataGridView1.Rows.Count < 1)
@@ -236,102 +256,131 @@ namespace DAZ3D_JPEGifier
                 int saved = 0;
                 Program.selector = new Form2();
                 Program.selector.ShowDialog();
-                ImageCodecInfo jpgEncoder = GetEncoder(ImageFormat.Jpeg);
-                ///Setting up parameters for diffuse textures
-                System.Drawing.Imaging.Encoder diffuseEncoder = System.Drawing.Imaging.Encoder.Quality;
-                EncoderParameters diffuseParams = new EncoderParameters(1);
-                EncoderParameter diffuseParameter = new EncoderParameter(diffuseEncoder, Program.quality);
-                diffuseParams.Param[0] = diffuseParameter;
-                ///Setting up parameters for other textures 
-                System.Drawing.Imaging.Encoder othersEncoder = System.Drawing.Imaging.Encoder.Quality;
-                EncoderParameters othersParams = new EncoderParameters(1);
-                EncoderParameter othersParameter = new EncoderParameter(othersEncoder, 95L);
-                othersParams.Param[0] = othersParameter;
-                ///Processing files from the grid
-                foreach (DataGridViewRow line in dataGridView1.Rows)
+                if (Program.ready == true)
                 {
-                    string infile = "";
-                    int indexLib = 0;
-                    for (int i = 0; i < listBox1.Items.Count; i++)
+                    ImageCodecInfo jpgEncoder = GetEncoder(ImageFormat.Jpeg);
+                    ///Setting up parameters for diffuse textures
+                    System.Drawing.Imaging.Encoder diffuseEncoder = System.Drawing.Imaging.Encoder.Quality;
+                    EncoderParameters diffuseParams = new EncoderParameters(1);
+                    EncoderParameter diffuseParameter = new EncoderParameter(diffuseEncoder, Program.quality);
+                    diffuseParams.Param[0] = diffuseParameter;
+                    ///Setting up parameters for other textures 
+                    System.Drawing.Imaging.Encoder othersEncoder = System.Drawing.Imaging.Encoder.Quality;
+                    EncoderParameters othersParams = new EncoderParameters(1);
+                    EncoderParameter othersParameter = new EncoderParameter(othersEncoder, 95L);
+                    othersParams.Param[0] = othersParameter;
+                    ///Processing files from the grid
+                    foreach (DataGridViewRow line in dataGridView1.Rows)
                     {
-
-                        infile = listBox1.Items[i].ToString() + line.Cells[0].Value.ToString();
-                        if (System.IO.File.Exists(infile) == true)
+                        string infile = "";
+                        int indexLib = 0;
+                        for (int i = 0; i < listBox1.Items.Count; i++)
                         {
-                            indexLib = i;
-                            break;
-                        }
-                    }
-                    string outFile = infile.Replace(".png", ".jpg");
 
-                    Bitmap image = new Bitmap(infile);
-                    if((infile.Contains("Normal") == true) || (infile.Contains("normal") == true) || (infile.Contains("Bump") == true) || (infile.Contains("bump") == true) || (infile.Contains("Height") == true) || (infile.Contains("height") == true) || (infile.Contains("N") == true) || (infile.Contains("nmap") == true))
-                    {
-                        image.Save(outFile, jpgEncoder, othersParams);
-                    }
-                    else
-                    {
-                        image.Save(outFile, jpgEncoder, diffuseParams);
-                    }
-                    line.Cells[2].Value = new FileInfo(outFile).Length;
-                }
-                ///Processing PNG mentions in DUF file
-                //check is DUF is compressed
-                string duf_new = Program.filepath;
-                using (var checkstream = System.IO.File.OpenRead(duf_new))
-                using (var checkstreamReader = new StreamReader(checkstream, Encoding.UTF8, true, 1024))
-                {
-                    string check;
-                    if ((check = checkstreamReader.ReadLine()) != "{")
-                    {
-                        string sfolder = duf_new.Substring(0, ProcessSubString(duf_new, "backwards") - 1);
-                        using (FileStream originalFile = System.IO.File.OpenRead(duf_new))
-                        {
-                            string currentFile = duf_new;
-                            string outFile = duf_new.Remove(duf_new.Length - 4);
-                            using (FileStream decompressedFile = System.IO.File.Create(outFile))
+                            infile = listBox1.Items[i].ToString() + line.Cells[0].Value.ToString();
+                            if (System.IO.File.Exists(infile) == true)
                             {
-                                using (GZipStream decompressionStream = new GZipStream(originalFile, CompressionMode.Decompress))
-                                {
-                                    decompressionStream.CopyTo(decompressedFile);
-                                }
+                                indexLib = i;
+                                break;
                             }
-                            duf_new = outFile;
                         }
+                        string outFile = infile.Replace(".png", ".jpg");
+                        
+                        Bitmap image = new Bitmap(infile);
+                        if ((infile.Contains("Normal") == true) || (infile.Contains("normal") == true) || (infile.Contains("Bump") == true) || (infile.Contains("bump") == true) || (infile.Contains("Height") == true) || (infile.Contains("height") == true) || (infile.Contains("N") == true) || (infile.Contains("nmap") == true))
+                        {
+                            image.Save(outFile, jpgEncoder, othersParams);
+                            if (Program.resize == true)
+                            {
+                                ResizeJpg(outFile, Program.textureSize, Program.textureSize);
+                            }
+                        }
+                        else
+                        {
+                            image.Save(outFile, jpgEncoder, diffuseParams);
+                            if (Program.resize == true)
+                            {
+                                ResizeJpg(outFile, Program.textureSize, Program.textureSize);
+                            }
+                        }
+                        line.Cells[2].Value = new FileInfo(outFile).Length;
+                        image.Dispose();    
 
                     }
-                }
+                    foreach (DataGridViewRow line in dataGridView1.Rows)
+                    {
+                        string infile = "";
+                        for (int i = 0; i < listBox1.Items.Count; i++)
+                        {
 
-                string tempfile = Program.filepath + ".temp";
-                using (var infile = System.IO.File.OpenRead(duf_new))
-                    using (var outfile = System.IO.File.OpenWrite(tempfile))
-                        using (var streamReader = new StreamReader(infile, Encoding.UTF8, true, 1024))
-                            using (var streamWriter = new StreamWriter(outfile, Encoding.UTF8))
+                            infile = listBox1.Items[i].ToString() + line.Cells[0].Value.ToString();
+                            if (System.IO.File.Exists(infile) == true)
                             {
-                                string line;
-                                while ((line = streamReader.ReadLine()) != null)
+                                System.GC.Collect();
+                                System.GC.WaitForPendingFinalizers();
+
+                                File.Delete(infile);
+                            }
+                        }
+                    }
+                    ///Processing PNG mentions in DUF file
+                    //check is DUF is compressed
+                    string duf_new = Program.filepath;
+                    using (var checkstream = System.IO.File.OpenRead(duf_new))
+                    using (var checkstreamReader = new StreamReader(checkstream, Encoding.UTF8, true, 1024))
+                    {
+                        string check;
+                        if ((check = checkstreamReader.ReadLine()) != "{")
+                        {
+                            string sfolder = duf_new.Substring(0, ProcessSubString(duf_new, "backwards") - 1);
+                            using (FileStream originalFile = System.IO.File.OpenRead(duf_new))
+                            {
+                                string currentFile = duf_new;
+                                string outFile = duf_new.Remove(duf_new.Length - 4);
+                                using (FileStream decompressedFile = System.IO.File.Create(outFile))
                                 {
-                                    if (line.Contains(".png") == true)
+                                    using (GZipStream decompressionStream = new GZipStream(originalFile, CompressionMode.Decompress))
                                     {
-                                        line = line.Replace(".png", ".jpg");
+                                        decompressionStream.CopyTo(decompressedFile);
                                     }
-                                    streamWriter.WriteLine(line);
                                 }
+                                duf_new = outFile;
+                            }
+
+                        }
+                    }
+
+                    string tempfile = Program.filepath + ".temp";
+                    using (var infile = System.IO.File.OpenRead(duf_new))
+                    using (var outfile = System.IO.File.OpenWrite(tempfile))
+                    using (var streamReader = new StreamReader(infile, Encoding.UTF8, true, 1024))
+                    using (var streamWriter = new StreamWriter(outfile, Encoding.UTF8))
+                    {
+                        string line;
+                        while ((line = streamReader.ReadLine()) != null)
+                        {
+                            if ((line.Contains(".png") == true) && (line.Contains("OctaneRender") != true))
+                            {
+                                line = line.Replace(".png", ".jpg");
+                            }
+                            streamWriter.WriteLine(line);
+                        }
+                    }
+                    if (duf_new.Contains(".duf") == false)
+                    {
+                        System.IO.File.Delete(duf_new);
+                    }
+                    File.Delete(Program.filepath);
+                    File.Copy(tempfile, Program.filepath);
+                    File.Delete(tempfile);
+                    ///Calculating how much we saved by converting PNGs
+                    foreach (DataGridViewRow line in dataGridView1.Rows)
+                    {
+                        int diff = Convert.ToInt32(line.Cells[1].Value.ToString()) - Convert.ToInt32(line.Cells[2].Value.ToString());
+                        saved += diff;
+                    }
+                    MessageBox.Show($"You saved {saved / 1024} Kbytes by converting it!", "Hooray!", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-                if (duf_new.Contains(".duf") == false)
-                {
-                    System.IO.File.Delete(duf_new);
-                }
-                File.Delete(Program.filepath);
-                File.Copy(tempfile, Program.filepath);
-                File.Delete(tempfile);
-                ///Calculating how much we saved by converting PNGs
-                foreach (DataGridViewRow line in dataGridView1.Rows)
-                {
-                    int diff = Convert.ToInt32(line.Cells[1].Value.ToString()) - Convert.ToInt32(line.Cells[2].Value.ToString());
-                    saved += diff;
-                }
-                MessageBox.Show($"You saved {saved / 1024} Kbytes by converting it!", "Hooray!", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
@@ -389,7 +438,7 @@ namespace DAZ3D_JPEGifier
 
         private void button4_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("https://boosty.to/littlefisky");
+            System.Diagnostics.Process.Start("https://boosty.to/littlefisky/single-payment/donation/451573/target?share=target_link");
         }
 
         private void button5_Click(object sender, EventArgs e)
@@ -397,6 +446,12 @@ namespace DAZ3D_JPEGifier
             folderBrowserDialog1.ShowDialog();
             string path = folderBrowserDialog1.SelectedPath.Replace('\\', '/') + '/';
             listBox1.Items.Add(path);
+        }
+
+        private void label4_Click(object sender, EventArgs e)
+        {
+            Program.info = new Form3();
+            Program.info.ShowDialog();
         }
     }
 }

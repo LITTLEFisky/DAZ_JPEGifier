@@ -14,7 +14,11 @@ namespace DAZ3D_JPEGifier
         public static int quality = 90;
         public static int libIndex = 0;
         public static Form2 selector;
+        public static Form3 info;
         public static string filepath = "";
+        public static int textureSize = 0;
+        public static bool resize = false;
+        public static bool ready = false;
         [STAThread]
 
         static void Main()
